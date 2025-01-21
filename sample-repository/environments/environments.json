@@ -1,0 +1,34 @@
+[
+    {
+        "ID": "dev",
+        "Target": [
+            "App-Dev:ou-1xkr-jihe6ljj",
+            "Financial-Dev:ou-1xkr-nef9mmh0"
+        ]
+    },
+    {
+        "ID": "testing",
+        "Target": [
+            "App-Hom:ou-1xkr-5oneq62y",
+            "Financial-Hom:ou-1xkr-9e6nkm4n"
+        ]
+    },
+    {
+        "ID": "products",
+        "Target": [
+            "App:ou-1xkr-9j41mbxa",
+            "Financial:ou-1xkr-zq8s8n5y",
+            "HumanResources:ou-1xkr-c3j5lvfr",
+            "WebPortal:ou-1xkr-ksebgcph"
+        ]
+    },
+    {
+        "ID": "core",
+        "Target": [
+            "Sandbox:ou-1xkr-6fk7kk14",
+            "Security:ou-1xkr-iq20g45l",
+            "Shared:ou-1xkr-6m82vqb8",
+            "Workload:ou-1xkr-qb4zeksc"
+        ]
+    }
+]
