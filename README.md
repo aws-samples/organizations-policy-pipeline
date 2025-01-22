@@ -1,4 +1,4 @@
-# Organization Policy Management Pipeline
+# Organizations Policy Management Pipeline
 ## Overview
 Authorization policies in AWS Organizations enable you to centrally configure and manage access for principals and resources in your member accounts. How those policies affect the organizational units (OUs) and accounts that you apply them to depends on the type of authorization policy. Service Control Policies (SCPs) are principal-centric controls. SCPs create a permissions guardrail, or set limits, on the maximum permissions available to principals in your member accounts. Resource Control Policies (RCPs) are resource-centric controls. RCPs create a permissions guardrail, or set limits, on the maximum permissions available for resources in your member accounts.
 
