@@ -6,7 +6,7 @@ import os
 import sys
 from  utils import mergeandoptimize
 import logging
-import boto3 
+import boto3
 
 # Create a logger
 logger = logging.getLogger(__name__)
@@ -42,9 +42,11 @@ GUARDRAIL_FOLDER = os.getcwd() + "/../../" + "scp-management/guardrails/"
 POLICY_FOLDER = os.getcwd() + "/../../" + "scp-management/policies/"
 
 def main():
-    print("#################################")
-    print("# Starting SCP Policy Processor #")
-    print("#################################\n")    
+
+    logger.info("#################################")
+    logger.info("# Starting SCP Policy Processor #")
+    logger.info("#################################\n")
+
     # Load content from SCP management file
     scps = []
     with open(SCP_MANAGEMENT_FILE_PATH, 'r') as f:
@@ -52,7 +54,6 @@ def main():
 
     with open(ENVIRONMENT_FILE_PATH, 'r') as g:
         environment_ou_list = json.load(g)
-
 
     # Validate if "SID" field are unique
     sid_set = set()

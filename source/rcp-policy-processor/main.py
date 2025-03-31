@@ -6,6 +6,7 @@ import os
 import sys
 from  utils import mergeandoptimize
 import logging
+import boto3
 
 # Create a logger
 logger = logging.getLogger(__name__)
@@ -41,9 +42,11 @@ GUARDRAIL_FOLDER = os.getcwd() + "/../../" + "rcp-management/guardrails/"
 POLICY_FOLDER = os.getcwd() + "/../../" + "rcp-management/policies/"
 
 def main():
-    print("#################################")
-    print("# Starting RCP Policy Processor #")
-    print("#################################\n")
+
+    logger.info("#################################")
+    logger.info("# Starting RCP Policy Processor #")
+    logger.info("#################################\n")
+
     # Load content from RCP management file
     rcps = []
     with open(RCP_MANAGEMENT_FILE_PATH, 'r') as f:
@@ -51,7 +54,6 @@ def main():
 
     with open(ENVIRONMENT_FILE_PATH, 'r') as g:
         environment_ou_list = json.load(g)
-
 
     # Validate if "SID" field are unique
     sid_set = set()
@@ -109,6 +111,15 @@ def main():
                 rcp_statement['policy'] = optmized_policy
                 rcp_statement['sid'] = statement['SID']
                 rcps.append(rcp_statement.copy())
+        elif statement['Target']['Type'] == "Tag":
+            logging.info(f"Target type is {statement['Target']['Type']}")
+            targets = get_aws_accounts_by_tag(statement['Target']['ID'].split(":")[0], statement['Target']['ID'].split(":")[1])
+            
+            for each_accountid in targets:
+                rcp_statement['target_id'] = each_accountid
+                rcp_statement['policy'] = optmized_policy
+                rcp_statement['sid'] = statement['SID']
+                rcps.append(rcp_statement.copy())
         else:
             logging.error("[!] Invalid Target Type: " + str(statement['Target']['Type']))
             sys.exit(1)
@@ -116,4 +127,39 @@ def main():
         print()
     with open('../terraform/rcps.json', 'w') as o:
         json.dump(rcps, o)
+
+
+def get_aws_accounts_by_tag(tag_key, tag_value):
+    try:
+        # Create organizations client
+        org_client = boto3.client('organizations')
+        
+        # List all accounts with pagination
+        accounts = []
+        paginator = org_client.get_paginator('list_accounts')
+        
+        for page in paginator.paginate():
+            accounts.extend(page['Accounts'])
+            
+        # Get accounts with matching tag
+        matching_accounts = []
+        
+        for account in accounts:
+            # Get tags for each account
+            tags = org_client.list_tags_for_resource(
+                ResourceId=account['Id']
+            )['Tags']
+            
+            # Check if account has matching tag
+            for tag in tags:
+                if tag['Key'] == tag_key and tag['Value'] == tag_value:
+                    matching_accounts.append(account['Id'])
+                    break
+                    
+        return matching_accounts
+        
+    except Exception as e:
+        print(f"Error getting accounts by tag: {str(e)}")
+        return []
+
 main()

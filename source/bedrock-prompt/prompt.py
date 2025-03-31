@@ -15,7 +15,7 @@ def load_prompt():
 def concatenate_logs():
     parent_dir = "."
     concatenated_logs = ""
-    log_files = ["scp.log", "tf.log"]
+    log_files = ["scp.log", "rcp.log", "tf.log"]
 
     for log_file in log_files:
         file_path = os.path.join(parent_dir, log_file)

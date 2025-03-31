@@ -3,7 +3,7 @@
         "SID": "example-account",
         "Target": {
             "Type": "Account",
-            "ID": "app01-dev:767397898096"
+            "ID": "app-dev:012345678901"
         },
         "Guardrails": [
             "iam-access-analyzer",
@@ -17,7 +17,7 @@
         "SID": "example-ou",
         "Target": {
             "Type": "OU",
-            "ID": "Financial-Hom:ou-1xkr-9e6nkm4n"
+            "ID": "Financial-Hom:ou-0xxx-1x2xxx3x"
         },
         "Guardrails": [],
         "Policy": "scp-tag-finops",

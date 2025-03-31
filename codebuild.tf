@@ -1,10 +1,6 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-locals {
-  terraform_version = var.terraform_version
-}
-
 ## +-------
 ## | CODEBUILD - Plan & Validation
 ## +---------------------------------
@@ -47,7 +43,7 @@ resource "aws_codebuild_project" "validation" {
             "cd source",
             "aws s3api get-object --bucket ${aws_s3_bucket.artifacts.id} --key scripts/source.zip source.zip",
             "unzip source.zip -d .",
-            "rm source.zip",            
+            "rm source.zip",
             "echo '[INFO] [INSTALL] Installing finished'"
           ]
         }
@@ -55,7 +51,7 @@ resource "aws_codebuild_project" "validation" {
           commands = var.enable_bedrock ? [
             "echo '[INFO] Starting build phase'",
             "cd terraform/",
-            "chmod +x ../scp-policy-processor/main.py", 
+            "chmod +x ../scp-policy-processor/main.py",
             "python3 ../scp-policy-processor/main.py",
             "chmod +x ../rcp-policy-processor/main.py",
             "python3 ../rcp-policy-processor/main.py",
@@ -64,10 +60,10 @@ resource "aws_codebuild_project" "validation" {
             "python3 ../bedrock-prompt/prompt.py",
             "SUMMARY=$(cat summary.txt)",
             "export SUMMARY"
-          ] : [
+            ] : [
             "echo '[INFO] Starting build phase'",
             "cd terraform/",
-            "chmod +x ../scp-policy-processor/main.py", 
+            "chmod +x ../scp-policy-processor/main.py",
             "python3 ../scp-policy-processor/main.py",
             "chmod +x ../rcp-policy-processor/main.py",
             "python3 ../rcp-policy-processor/main.py",

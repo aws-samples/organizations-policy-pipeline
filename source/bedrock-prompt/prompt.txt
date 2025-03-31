@@ -21,7 +21,7 @@ You are reading logs from the command "terraform plan". To read Terraform plan l
 - Look for lines starting with "+" (additions), "-" (deletions), or "~" (modifications).
 - These indicate which resources will be created, destroyed, or updated.
 
-For resource "aws_organizations_policy" "scp_policy" from terraform, you will be presented with a JSON file. Each JSON statement should be analyzed individually.
+For resources "aws_organizations_policy" "scp_policy" and "rcp_policy" from terraform, you will be presented with a JSON file. Each JSON statement should be analyzed individually.
 If the JSON statements doesn't have any symbol of addition, deletion or modification in the beginning of the line, it should be ignored from the analysis. 
 
 </Terraform logs instructions>

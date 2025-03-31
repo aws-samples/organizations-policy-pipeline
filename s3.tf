@@ -97,10 +97,10 @@ data "archive_file" "init" {
 }
 
 resource "aws_s3_object" "object" {
-  depends_on = [ data.archive_file.init ]
+  depends_on = [data.archive_file.init]
   bucket     = aws_s3_bucket.artifacts.id
   key        = "scripts/source.zip"
-  source     = "${data.archive_file.init.output_path}"
+  source     = data.archive_file.init.output_path
   etag       = filemd5(data.archive_file.init.output_path)
 }
 
