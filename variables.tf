@@ -23,13 +23,13 @@ variable "branch_name" {
 
 variable "terraform_version" {
   description = "Terraform version to be used in the pipeline"
-  type = string
+  type        = string
   default     = "1.9.8"
 }
 
 variable "enable_bedrock" {
   description = "Enable Amazon Bedrock to summarize pipeline logs for manual approval stage"
-  type = bool
+  type        = bool
   default     = true
 }
 

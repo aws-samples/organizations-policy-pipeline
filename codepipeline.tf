@@ -8,7 +8,7 @@
 resource "aws_codestarconnections_connection" "connection" {
   name          = "${var.project_name}-connection"
   provider_type = var.provider_type
-  tags = var.tags
+  tags          = var.tags
 }
 
 

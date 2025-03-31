@@ -55,7 +55,7 @@ locals {
     }
   ]
 
-  # Create a mapping for SCP policy attachments
+  # Create a mapping for policy attachments
 
   #SCP attachments
   scps_attachments = {
@@ -75,7 +75,6 @@ locals {
 ## | SERVICE CONTROL POLICY (SCP)
 ## +---------------------------------
 
-
 # Create the SCP policies in AWS Organizations
 resource "aws_organizations_policy" "scp_policy" {
   for_each = { for policy in local.scps_processed : policy.sid => policy }
@@ -86,7 +85,7 @@ resource "aws_organizations_policy" "scp_policy" {
   type        = "SERVICE_CONTROL_POLICY"
 }
 
-# Create the attachments between policies and their targets
+# Create the attachments between SCP policies and their targets
 resource "aws_organizations_policy_attachment" "scp_attachment" {
   for_each = local.scps_attachments
 
@@ -94,10 +93,10 @@ resource "aws_organizations_policy_attachment" "scp_attachment" {
   target_id = each.value.target_id
 }
 
+
 ## +-------
 ## | RESOURCE CONTROL POLICY (RCP)
 ## +---------------------------------
-
 
 # Create the RCP policies in AWS Organizations
 resource "aws_organizations_policy" "rcp_policy" {
@@ -109,7 +108,7 @@ resource "aws_organizations_policy" "rcp_policy" {
   type        = "RESOURCE_CONTROL_POLICY"
 }
 
-# Create the attachments between policies and their targets
+# Create the attachments between RCP policies and their targets
 resource "aws_organizations_policy_attachment" "rcp_attachment" {
   for_each = local.rcps_attachments
 
