@@ -75,6 +75,7 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
         Effect = "Allow"
         Action = [
           "codestar-connections:UseConnection",
+          "codeconnections:UseConnection"          
         ]
         Resource = aws_codestarconnections_connection.connection.arn
       }
