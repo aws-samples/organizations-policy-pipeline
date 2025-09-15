@@ -76,43 +76,66 @@ def main():
         
         # Checks if statement is using GUARDRAIL or POLICY
         if statement["Guardrails"] != []:
-            logging.info("Guardrails are being used, not policy")
+            logger.info(f"Guardrails are being used for SID {statement['SID']}: {statement['Guardrails']}")
             optmized_policy = mergeandoptimize.mergeguardrails(statement['Guardrails'], GUARDRAIL_FOLDER)
         elif statement["Policy"] != "":
-            logging.info("Policy is being used, not guardrails")
+            logger.info(f"Individual policy is being used for SID {statement['SID']}: {statement['Policy']}")
             with open(POLICY_FOLDER + str(statement["Policy"]) + ".json", 'r') as h:
-                optmized_policy = json.load(h)
+                policy_content = json.load(h)
+            
+            # Validate individual policy with Access Analyzer
+            logger.info(f"Validating individual RCP policy '{statement['Policy']}' with Access Analyzer")
+            access_analyzer_client = boto3.client('accessanalyzer')
+            findings = []
+            paginator = access_analyzer_client.get_paginator('validate_policy')
+            
+            for page in paginator.paginate(
+                locale="EN",
+                policyDocument=json.dumps(policy_content),
+                policyType="RESOURCE_CONTROL_POLICY",
+            ):
+                findings.extend(page["findings"])
+            
+            if findings:
+                logger.critical(
+                    f"[!] Security findings were found in RCP policy {statement['Policy']}: {json.dumps(findings, indent=4)}"
+                )
+                sys.exit(1)
+            else:
+                logger.info(f"No findings found in individual policy '{statement['Policy']}'")
+            
+            optmized_policy = policy_content
         else:
-            logging.error("[!] No policy or guardrails found for statement ID: " + str(statement['SID']))
+            logger.error("[!] No policy or guardrails found for statement ID: " + str(statement['SID']))
             sys.exit(1)
 
         # Checks the target Type
         if statement['Target']['Type'] == "Account" or statement['Target']['Type'] == "OU":
-            logging.info(f"Target type is {statement['Target']['Type']}")
+            logger.info(f"Target type is {statement['Target']['Type']}")
             rcp_statement['target_id'] = statement['Target']['ID'].split(":")[1]
             rcp_statement['sid'] = statement['SID']
             rcp_statement['policy'] = optmized_policy
             rcps.append(rcp_statement.copy())
         elif statement['Target']['Type'] == "Environment":
-            logging.info(f"Target type is {statement['Target']['Type']}")
+            logger.info(f"Target type is {statement['Target']['Type']}")
             targets = []
             for environment in environment_ou_list:
                 if environment["ID"] == statement['Target']['ID']:
-                    logging.info(f'Environment ID found: {environment["ID"]}')
+                    logger.info(f'Environment ID found: {environment["ID"]}')
                     targets = environment["Target"].copy()
                 
             if targets == []:
-                logging.error(f"Environment ID not found for SID {statement['SID']}: {statement['Target']['ID']}")
+                logger.error(f"Environment ID not found for SID {statement['SID']}: {statement['Target']['ID']}")
                 sys.exit(1)
                     
-            logging.info(f"The environment {statement['Target']['Type']} has the following targets: {targets}")
+            logger.info(f"The environment {statement['Target']['Type']} has the following targets: {targets}")
             for each_target in targets:
                 rcp_statement['target_id'] = each_target.split(":")[1]
                 rcp_statement['policy'] = optmized_policy
                 rcp_statement['sid'] = statement['SID']
                 rcps.append(rcp_statement.copy())
         elif statement['Target']['Type'] == "Tag":
-            logging.info(f"Target type is {statement['Target']['Type']}")
+            logger.info(f"Target type is {statement['Target']['Type']}")
             targets = get_aws_accounts_by_tag(statement['Target']['ID'].split(":")[0], statement['Target']['ID'].split(":")[1])
             
             for each_accountid in targets:
@@ -121,7 +144,7 @@ def main():
                 rcp_statement['sid'] = statement['SID']
                 rcps.append(rcp_statement.copy())
         else:
-            logging.error("[!] Invalid Target Type: " + str(statement['Target']['Type']))
+            logger.error("[!] Invalid Target Type: " + str(statement['Target']['Type']))
             sys.exit(1)
                 
         print()
