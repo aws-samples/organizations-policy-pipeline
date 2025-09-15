@@ -98,7 +98,7 @@ def mergeguardrails(guardrails_list, guardrails_folder):
         logger.info("No findings found")
     else:
         logger.critical(
-            f"Security findings were found in SCP policy: {json.dumps(findings, indent=4)}"
+            f"[!] Security findings were found in SCP policy: {json.dumps(findings, indent=4)}"
         )
         sys.exit(1)
 
@@ -133,7 +133,7 @@ def concatenate_policy_files(guardrails_list, guardrails_folder):
                     ]
                 )
         except json.JSONDecodeError:
-            logger.error(f"Error: {file_full_path} is not a valid file.")
+            logger.error(f"[!] Error: {file_full_path} is not a valid file.")
     return file_contents
 
 

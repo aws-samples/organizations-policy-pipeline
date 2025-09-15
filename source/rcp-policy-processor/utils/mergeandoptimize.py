@@ -103,7 +103,7 @@ def mergeguardrails(guardrails_list, guardrails_folder):
         logger.info("No findings found")
     else:
         logger.critical(
-            f"Security findings were found in RCP policy: {json.dumps(findings, indent=4)}"
+            f"[!] Security findings were found in RCP policy: {json.dumps(findings, indent=4)}"
         )
         sys.exit(1)
 
@@ -138,7 +138,7 @@ def concatenate_policy_files(guardrails_list, guardrails_folder):
                     ]
                 )
         except json.JSONDecodeError:
-            logger.error(f"Error: {file_full_path} is not a valid file.")
+            logger.error(f"[!] Error: {file_full_path} is not a valid file.")
     return file_contents
 
 
@@ -183,6 +183,25 @@ def normalize_resource(resource):
     return []
 
 
+def normalize_principal(principal):
+    """
+    Normalize principal field for RCPs - Access Analyzer validates requirements
+    """
+    if principal == "*" or principal == ["*"]:
+        return "*"
+    elif isinstance(principal, dict) and principal == {"AWS": "*"}:
+        return "*"
+    elif principal == "" or principal is None:
+        # Provide clear error for missing/empty Principal
+        logger.error("[!] Missing or empty Principal in RCP policy")
+        logger.error("[!] RCP policies must have Principal set to '*'")
+        logger.error("[!] See: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_rcps_syntax.html#rcp-syntax-principal")
+        sys.exit(1)
+    else:
+        # Let Access Analyzer handle validation of invalid principals
+        return principal
+
+
 def optimize_iam_policy(policy):
     """
     Function to optimize IAM policy with normalized condition ordering and resource handling.
@@ -219,23 +238,28 @@ def optimize_iam_policy(policy):
             else:
                 resource_key = json.dumps(normalized_resource, sort_keys=True)
 
+            # Normalize the principal field
+            normalized_principal = normalize_principal(statement.get("Principal", ""))
+            
             key = (
                 resource_key,
                 json.dumps(normalized_condition, sort_keys=True),
                 statement.get("Effect", ""),
+                json.dumps(normalized_principal, sort_keys=True),
             )
             grouped_statements.setdefault(key, []).append(statement)
 
     optimized_statements = []
 
     # Process Action statements
-    for (resource, condition, effect), group in grouped_statements.items():
+    for (resource, condition, effect, principal), group in grouped_statements.items():
         if len(group) == 1:
             optimized_statements.append(group[0])
         else:
             merged_statement = OrderedDict(
                 [
                     ("Effect", effect),
+                    ("Principal", group[0].get("Principal", "*")),
                     (
                         "Action",
                         sorted(
