@@ -4,10 +4,16 @@
 ## | UTILS
 ## +---------------------------------
 
-# Read the JSON file and decode it into a Terraform data structure
 terraform {
-  backend "s3" {
+  required_version = ">=1.9.8"
+  required_providers {
+    aws = {
+      source                = "hashicorp/aws"
+      version               = "~>6.0"
+    }
   }
+  backend "s3" {
+  }  
 }
 
 locals {
@@ -22,6 +28,7 @@ locals {
     for scp in local.scps_raw :
     scp.sid => {
       sid    = scp.sid
+      comments    = scp.comments
       policy = jsonencode(scp.policy)
     }...
   }
@@ -31,6 +38,7 @@ locals {
     for rcp in local.rcps_raw :
     rcp.sid => {
       sid    = rcp.sid
+      comments    = rcp.comments
       policy = jsonencode(rcp.policy)
     }...
   }
@@ -42,6 +50,7 @@ locals {
     for sid, items in local.scps_map :
     {
       sid    = sid
+      comments    = items[0].comments
       policy = items[0].policy
     }
   ]
@@ -51,6 +60,7 @@ locals {
     for sid, items in local.rcps_map :
     {
       sid    = sid
+      comments    = items[0].comments
       policy = items[0].policy
     }
   ]
@@ -80,7 +90,7 @@ resource "aws_organizations_policy" "scp_policy" {
   for_each = { for policy in local.scps_processed : policy.sid => policy }
 
   name        = "scp-mgmt-${each.value.sid}"
-  description = "SCP Policy for ${each.value.sid}"
+  description = "SCP Policy for ${each.value.comments}"
   content     = each.value.policy
   type        = "SERVICE_CONTROL_POLICY"
 }
@@ -103,7 +113,7 @@ resource "aws_organizations_policy" "rcp_policy" {
   for_each = { for policy in local.rcps_processed : policy.sid => policy }
 
   name        = "rcp-mgmt-${each.value.sid}"
-  description = "RCP Policy for ${each.value.sid}"
+  description = "RCP Policy for ${each.value.comments}"
   content     = each.value.policy
   type        = "RESOURCE_CONTROL_POLICY"
 }

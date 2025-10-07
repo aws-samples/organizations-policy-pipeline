@@ -163,7 +163,8 @@ resource "aws_iam_role_policy" "codebuild_policy_plan" {
           "Organizations:DescribePolicy",
           "Organizations:ListTagsForResource",
           "Organizations:ListTargetsForPolicy",
-          "Bedrock:InvokeModel"
+          "Bedrock:InvokeModel",
+          "Bedrock:InvokeModelWithResponseStream"
         ]
         Resource = "*"
       }
