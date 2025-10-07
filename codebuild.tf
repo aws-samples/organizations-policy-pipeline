@@ -17,10 +17,20 @@ resource "aws_codebuild_project" "validation" {
 
   environment {
     compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "aws/codebuild/standard:5.0"
+    image                       = "aws/codebuild/standard:7.0"
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
+    environment_variable {
+      name  = "SECURITY_GATE"
+      value = jsonencode(var.security_gate)
+    }
+    environment_variable {
+      name  = "INFERENCE_PROFILE"
+      value = jsonencode(var.bedrock_model_id)
+    }    
   }
+
+
 
   logs_config {
     cloudwatch_logs {
@@ -55,7 +65,7 @@ resource "aws_codebuild_project" "validation" {
             "python3 ../scp-policy-processor/main.py",
             "chmod +x ../rcp-policy-processor/main.py",
             "python3 ../rcp-policy-processor/main.py",
-            "terraform init -backend-config='bucket=${aws_s3_bucket.tfstate.id}' -backend-config='key=${var.project_name}.tfstate' -backend-config='region=${data.aws_region.current.name}'",
+            "terraform init -backend-config='bucket=${aws_s3_bucket.tfstate.id}' -backend-config='key=${var.project_name}.tfstate' -backend-config='region=${data.aws_region.current.region}'",
             "terraform plan | tee tf.log",
             "python3 ../bedrock-prompt/prompt.py",
             "SUMMARY=$(cat summary.txt)",
@@ -67,7 +77,7 @@ resource "aws_codebuild_project" "validation" {
             "python3 ../scp-policy-processor/main.py",
             "chmod +x ../rcp-policy-processor/main.py",
             "python3 ../rcp-policy-processor/main.py",
-            "terraform init -backend-config='bucket=${aws_s3_bucket.tfstate.id}' -backend-config='key=${var.project_name}.tfstate' -backend-config='region=${data.aws_region.current.name}'",
+            "terraform init -backend-config='bucket=${aws_s3_bucket.tfstate.id}' -backend-config='key=${var.project_name}.tfstate' -backend-config='region=${data.aws_region.current.region}'",
             "terraform plan | tee tf.log",
             "SUMMARY=$(echo 'You have new SCP/RCP changes to approve. See ValidationPlan logs for more details.')",
             "export SUMMARY"
@@ -107,13 +117,13 @@ resource "aws_codebuild_project" "apply" {
 
   logs_config {
     cloudwatch_logs {
-      group_name = "${var.project_name}-validation"
+      group_name = "${var.project_name}-apply"
     }
   }
 
   environment {
     compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "aws/codebuild/standard:5.0"
+    image                       = "aws/codebuild/standard:7.0"
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
   }
@@ -136,7 +146,7 @@ resource "aws_codebuild_project" "apply" {
           commands = [
             "echo '[INFO] Starting build phase'",
             "cd source/terraform",
-            "terraform init -backend-config='bucket=${aws_s3_bucket.tfstate.id}' -backend-config='key=${var.project_name}.tfstate' -backend-config='region=${data.aws_region.current.name}'",
+            "terraform init -backend-config='bucket=${aws_s3_bucket.tfstate.id}' -backend-config='key=${var.project_name}.tfstate' -backend-config='region=${data.aws_region.current.region}'",
             "terraform apply -auto-approve"
           ]
         }

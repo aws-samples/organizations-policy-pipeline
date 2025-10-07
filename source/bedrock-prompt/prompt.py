@@ -6,6 +6,15 @@ import boto3
 import json
 import sys
 
+inference_profile = os.getenv(
+    "INFERENCE_PROFILE", "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
+)
+
+try:
+    model_id = json.loads(inference_profile)
+except json.JSONDecodeError:
+    model_id = inference_profile
+
 
 def load_prompt():
     with open("../bedrock-prompt/prompt.txt", "r") as file:
@@ -41,16 +50,32 @@ def query_bedrock(prompt):
         }
     )
 
-    modelId = "anthropic.claude-3-5-sonnet-20240620-v1:0"
     accept = "application/json"
     contentType = "application/json"
 
-    response = bedrock.invoke_model(
-        body=body, modelId=modelId, accept=accept, contentType=contentType
+    response = bedrock.invoke_model_with_response_stream(
+        body=body, accept=accept, contentType=contentType, modelId=model_id
     )
-    response_body = json.loads(response.get("body").read())
 
-    return response_body["content"][0]["text"]
+    full_response = ""
+    for event in response.get("body"):
+        chunk = json.loads(event.get("chunk").get("bytes").decode())
+        if "delta" in chunk:
+            if "text" in chunk["delta"]:
+                full_response += chunk["delta"]["text"]
+        elif "message" in chunk:
+            if "content" in chunk["message"]:
+                content = chunk["message"]["content"]
+                if isinstance(content, list):
+                    for item in content:
+                        if isinstance(item, dict) and "text" in item:
+                            full_response += item["text"]
+                        else:
+                            full_response += str(item)
+                else:
+                    full_response += str(content)
+
+    return full_response
 
 
 # Main execution
@@ -63,7 +88,7 @@ prompt += "Assistant:"
 response = query_bedrock(prompt)
 
 print("####################################")
-print("######## Gen AI Log Summary  #######")
+print("######## Gen AI Log Summary #######")
 print("####################################")
 print()
 print()
