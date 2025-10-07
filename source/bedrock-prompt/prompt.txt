@@ -51,7 +51,7 @@ Your analysis will help security managers make informed decisions about implemen
 
 <Pipeline Information>
 It is a pipeline to manage AWS Organization Service Control Policies and Resource Control Policies.
-The pipeline uses a file called scp-management.json to manage RCPs/SCPs. This file is a list of statements, using the format below:
+The pipeline uses a file called scp-management.json or rcp-management.json to manage RCPs/SCPs. This file is a list of statements, using the format below:
 [
     {
         "SID": "<string>",
