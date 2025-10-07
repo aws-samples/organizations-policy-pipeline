@@ -88,7 +88,7 @@ def main():
                 f"Guardrails are being used for SID {statement['SID']}: {statement['Guardrails']}"
             )
             optmized_policy = mergeandoptimize.mergeguardrails(
-                statement["Guardrails"], GUARDRAIL_FOLDER
+                statement["Guardrails"], GUARDRAIL_FOLDER, SECURITY_GATE
             )
         elif statement["Policy"] != "":
             logger.info(
@@ -130,7 +130,8 @@ def main():
                     logger.warning(
                         f"Non-critical findings were found in RCP policy {statement['Policy']}: {json.dumps(findings, indent=4)}"
                     )
-
+            else:
+                logger.info("No findings found")
             optmized_policy = policy_content
         else:
             logger.error(

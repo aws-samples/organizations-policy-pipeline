@@ -88,7 +88,7 @@ def main():
                 f"Guardrails are being used for SID {statement['SID']}: {statement['Guardrails']}"
             )
             optmized_policy = mergeandoptimize.mergeguardrails(
-                statement["Guardrails"], GUARDRAIL_FOLDER
+                statement["Guardrails"], GUARDRAIL_FOLDER, SECURITY_GATE
             )
         elif statement["Policy"] != "":
             logger.info(

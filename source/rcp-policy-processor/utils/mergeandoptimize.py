@@ -35,7 +35,7 @@ logger.addHandler(console_handler)
 config = Config(retries={"max_attempts": 1000, "mode": "adaptive"})
 
 
-def mergeguardrails(guardrails_list, guardrails_folder):
+def mergeguardrails(guardrails_list, guardrails_folder, security_gate):
     logger.info("Concatenating function")
     policy = OrderedDict(
         [
@@ -99,13 +99,24 @@ def mergeguardrails(guardrails_list, guardrails_folder):
     ):
         findings.extend(page["findings"])
 
-    if not findings:
-        logger.info("No findings found")
+    if findings:
+        critical_findings = [
+            finding
+            for finding in findings
+            if finding.get("findingType") in security_gate
+        ]
+
+        if critical_findings:
+            logger.critical(
+                f"[!] Findings were found in RCP policy: {json.dumps(critical_findings, indent=4)}"
+            )
+            sys.exit(1)
+        else:
+            logger.warning(
+                f"Non-critical findings were found in RCP policy: {json.dumps(findings, indent=4)}"
+            )
     else:
-        logger.critical(
-            f"[!] Security findings were found in RCP policy: {json.dumps(findings, indent=4)}"
-        )
-        sys.exit(1)
+        logger.info("No findings found")
 
     # Remove fields "SID" from statements to optmize size
     optimized_policy_no_sid = remove_sids_from_policy(optimized_policy)
@@ -195,7 +206,9 @@ def normalize_principal(principal):
         # Provide clear error for missing/empty Principal
         logger.error("[!] Missing or empty Principal in RCP policy")
         logger.error("[!] RCP policies must have Principal set to '*'")
-        logger.error("[!] See: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_rcps_syntax.html#rcp-syntax-principal")
+        logger.error(
+            "[!] See: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_rcps_syntax.html#rcp-syntax-principal"
+        )
         sys.exit(1)
     else:
         # Let Access Analyzer handle validation of invalid principals
@@ -240,7 +253,7 @@ def optimize_iam_policy(policy):
 
             # Normalize the principal field
             normalized_principal = normalize_principal(statement.get("Principal", ""))
-            
+
             key = (
                 resource_key,
                 json.dumps(normalized_condition, sort_keys=True),

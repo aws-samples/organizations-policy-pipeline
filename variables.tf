@@ -17,7 +17,7 @@ variable "full_repository_name" {
     condition     = can(regex("^[a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+$", var.full_repository_name))
     error_message = "Repository name must be in format 'org/repo'."
   }
-  default     = "andrecvnt/org-policy-mgmt-pipeline"
+  default     = "org/org-policy-mgmt-pipeline"
 }
 
 variable "branch_name" {
