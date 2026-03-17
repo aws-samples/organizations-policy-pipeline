@@ -74,11 +74,17 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
       },
       {
         Effect = "Allow"
-        Action = [
+        Action = var.provider_type != "CodeCommit" ? [
           "codeconnections:UseConnection",
           "codestar-connections:UseConnection"
+        ] : [
+          "codecommit:GetBranch",
+          "codecommit:GetCommit",
+          "codecommit:UploadArchive",
+          "codecommit:GetUploadArchiveStatus",
+          "codecommit:CancelUploadArchive"
         ]
-        Resource = aws_codestarconnections_connection.connection.arn
+        Resource = var.provider_type != "CodeCommit" ? aws_codestarconnections_connection.connection[0].arn : aws_codecommit_repository.repository[0].arn
       }
     ]
   })

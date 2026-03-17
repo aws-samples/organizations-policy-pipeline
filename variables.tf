@@ -7,15 +7,19 @@ variable "project_name" {
 }
 
 variable "provider_type" {
-  description = "The name of the external provider where your third-party code repository is configured. Valid values are Bitbucket, GitHub, GitHubEnterpriseServer, GitLab or GitLabSelfManaged"
+  description = "The name of the external provider where your third-party code repository is configured. Valid values are Bitbucket, GitHub, GitHubEnterpriseServer, GitLab, GitLabSelfManaged or CodeCommit"
+  validation {
+    condition     = contains(["Bitbucket", "GitHub", "GitHubEnterpriseServer", "GitLab", "GitLabSelfManaged", "CodeCommit"], var.provider_type)
+    error_message = "Valid values are Bitbucket, GitHub, GitHubEnterpriseServer, GitLab, GitLabSelfManaged or CodeCommit."
+  }
   default     = "GitHub"
 }
 
 variable "full_repository_name" {
-  description = "The name of the code repository where Organization Policies will be managed. Pattern would be 'org/repo_name'"  
+  description = "The name of the code repository where Organization Policies will be managed. Pattern would be 'org/repo_name'. If you want to use CodeCommit, cc/repo-name"  
   validation {
     condition     = can(regex("^[a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+$", var.full_repository_name))
-    error_message = "Repository name must be in format 'org/repo'."
+    error_message = "Repository name must be in format 'org/repo-name'."
   }
   default     = "org/org-policy-mgmt-pipeline"
 }
