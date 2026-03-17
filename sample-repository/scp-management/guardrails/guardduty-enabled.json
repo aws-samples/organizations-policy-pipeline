@@ -1,38 +1,28 @@
 [
-    {
-        "SID": "GDSID",
-        "Effect": "Deny",
-        "Action": [            
-            "guardduty:AcceptInvitation",
-            "guardduty:ArchiveFindings",
-            "guardduty:CreateDetector",
-            "guardduty:CreateFilter",
-            "guardduty:CreateIPSet",
-            "guardduty:CreateMembers",
-            "guardduty:CreatePublishingDestination",
-            "guardduty:CreateSampleFindings",
-            "guardduty:CreateThreatIntelSet",
-            "guardduty:DeclineInvitations",
-            "guardduty:Delete*",
-            "guardduty:DisassociateFromMasterAccount",
-            "guardduty:DisassociateMembers",
-            "guardduty:InviteMembers",
-            "guardduty:StartMonitoringMembers",
-            "guardduty:StopMonitoringMembers",
-            "guardduty:TagResource",
-            "guardduty:UnarchiveFindings",
-            "guardduty:UntagResource",
-            "guardduty:Update*"
-        ],
-        "Resource": "*",
-        "Condition": {
-            "ArnNotLike": {
-                "aws:PrincipalARN": [
-                    "arn:aws:iam::*:role/AWSAFTExecution",
-                    "arn:aws:iam::*:role/AWSControlTowerExecution"
-
-                ]
-            }
-        }
+  {
+    "Sid": "DenyGDchanges",
+    "Effect": "Deny",
+    "Action": [
+      "guardduty:DeleteDetector",
+      "guardduty:DeleteInvitations",
+      "guardduty:DeleteIPSet",
+      "guardduty:DeleteMembers",
+      "guardduty:DeleteThreatIntelSet",
+      "guardduty:DisassociateFromMasterAccount",
+      "guardduty:DisassociateMembers",
+      "guardduty:StopMonitoringMembers"
+    ],
+    "Resource": [
+      "*"
+    ],
+    "Condition": {
+      "ArnNotLike": {
+        "aws:PrincipalARN": [
+          "arn:*:iam::*:role/AWSControlTowerExecution",
+          "arn:*:iam::*:role/AWSAFTExecution",
+          "arn:*:iam::*:role/Admin"
+        ]
+      }
     }
+  }
 ]

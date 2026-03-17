@@ -1,0 +1,18 @@
+[
+  {
+    "Sid": "DenyPublicRDSCreation",
+    "Effect": "Deny",
+    "Action": [
+      "rds:CreateDBInstance",
+      "rds:CreateDBCluster",
+      "rds:ModifyDBInstance",
+      "rds:ModifyDBCluster"
+    ],
+    "Resource": "*",
+    "Condition": {
+      "Bool": {
+        "rds:PubliclyAccessible": "true"
+      }
+    }
+  }
+]

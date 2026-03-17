@@ -1,0 +1,18 @@
+[
+    {
+        "Effect": "Deny",
+        "Action": [
+            "elasticloadbalancing:CreateListener",
+            "elasticloadbalancing:ModifyListener"
+        ],
+        "Resource": "*",
+        "Condition": {
+            "ForAllValues:StringNotEquals": {
+                "elasticloadbalancing:SecurityPolicy": [
+                    "ELBSecurityPolicy-TLS13-1-2-PQ-2025-09",
+                    "ELBSecurityPolicy-TLS13-1-2-2021-06"
+                ]
+            }
+        }
+    }
+]

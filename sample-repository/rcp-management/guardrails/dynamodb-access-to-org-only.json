@@ -1,0 +1,16 @@
+[
+  {
+    "Effect": "Deny",
+    "Principal": "*",
+    "Action": "dynamodb:*",
+    "Resource": "*",
+    "Condition": {
+      "StringNotEqualsIfExists": {
+        "aws:PrincipalOrgID": "o-bwsbjmy5kb"
+      },
+      "BoolIfExists": {
+        "aws:PrincipalIsAWSService": "false"
+      }
+    }
+  }
+]

@@ -1,0 +1,39 @@
+[
+  {
+    "Sid": "LockRoot",
+    "Effect": "Deny",
+    "NotAction": [
+      "iam:CreateLoginProfile",
+      "iam:DeactivateMFADevice",
+      "iam:DeleteAccessKey",
+      "iam:DeleteLoginProfile",
+      "iam:DeleteSigningCertificate",
+      "iam:DeleteVirtualMFADevice",
+      "iam:GetAccessKeyLastUsed",
+      "iam:GetAccountSummary",
+      "iam:GetLoginProfile",
+      "iam:GetUser",
+      "iam:ListAccessKeys",
+      "iam:ListMFADevices",
+      "iam:ListSigningCertificates",
+      "s3:DeleteBucketPolicy",
+      "s3:GetBucketPolicy",
+      "s3:ListAllMyBuckets",
+      "s3:PutBucketPolicy",
+      "sqs:GetQueueAttributes",
+      "sqs:GetQueueUrl",
+      "sqs:ListQueues",
+      "sqs:SetQueueAttributes"
+    ],
+    "Resource": [
+      "*"
+    ],
+    "Condition": {
+      "ArnLike": {
+        "aws:PrincipalArn": [
+          "arn:aws:iam::*:root"
+        ]
+      }
+    }
+  }
+]

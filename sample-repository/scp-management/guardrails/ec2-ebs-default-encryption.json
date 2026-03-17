@@ -1,9 +1,10 @@
 [
   {
-    "Sid": "S3BlockPublicAccess",
     "Effect": "Deny",
     "Action": [
-      "s3:PutAccountPublicAccessBlock"
+      "ec2:DisableEbsEncryptionByDefault",
+      "ec2:ModifyEbsDefaultKmsKeyId",
+      "ec2:ResetEbsDefaultKmsKeyId"
     ],
     "Resource": [
       "*"

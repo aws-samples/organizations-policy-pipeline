@@ -1,9 +1,10 @@
 [
   {
-    "Sid": "S3BlockPublicAccess",
+    "Sid": "GlacierIAMAnalyzer",
     "Effect": "Deny",
     "Action": [
-      "s3:PutAccountPublicAccessBlock"
+      "glacier:DeleteArchive",
+      "glacier:DeleteVault"
     ],
     "Resource": [
       "*"

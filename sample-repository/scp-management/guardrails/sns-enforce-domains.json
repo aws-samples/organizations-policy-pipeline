@@ -1,0 +1,20 @@
+[
+  {
+    "Effect": "Deny",
+    "Action": "sns:Subscribe",
+    "Resource": "*",
+    "Condition": {
+      "StringNotLike": {
+        "sns:Endpoint": [
+          "*@amazon.com"
+        ]
+      },
+      "StringLike": {
+        "sns:Protocol": [
+          "email",
+          "email-json"
+        ]
+      }
+    }
+  }
+]
