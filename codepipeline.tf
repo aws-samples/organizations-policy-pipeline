@@ -6,6 +6,7 @@
 ## +---------------------------------
 
 resource "aws_codestarconnections_connection" "connection" {
+  count = var.provider_type == "CodeCommit" ? 0 : 1
   name          = "${var.project_name}-connection"
   provider_type = var.provider_type
   tags          = var.tags
@@ -35,17 +36,36 @@ resource "aws_codepipeline" "pipeline" {
   stage {
     name = "Source"
 
-    action {
-      name             = "Source"
-      category         = "Source"
-      owner            = "AWS"
-      provider         = "CodeStarSourceConnection"
-      version          = "1"
-      output_artifacts = ["source_output"]
-      configuration = {
-        ConnectionArn    = aws_codestarconnections_connection.connection.arn
-        FullRepositoryId = var.full_repository_name
-        BranchName       = var.branch_name
+    dynamic "action" {
+      for_each = var.provider_type != "CodeCommit" ? [1] : []
+      content {
+        name             = "Source"
+        category         = "Source"
+        owner            = "AWS"
+        provider         = "CodeStarSourceConnection"
+        version          = "1"
+        output_artifacts = ["source_output"]
+        configuration = {
+          ConnectionArn    = aws_codestarconnections_connection.connection[0].arn
+          FullRepositoryId = var.full_repository_name
+          BranchName       = var.branch_name
+        }
+      }
+    }
+
+    dynamic "action" {
+      for_each = var.provider_type == "CodeCommit" ? [1] : []
+      content {
+        name             = "Source"
+        category         = "Source"
+        owner            = "AWS"
+        provider         = "CodeCommit"
+        version          = "1"
+        output_artifacts = ["source_output"]
+        configuration = {
+          RepositoryName = aws_codecommit_repository.repository[0].repository_name
+          BranchName     = var.branch_name
+        }
       }
     }
   }
