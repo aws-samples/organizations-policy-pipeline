@@ -1,0 +1,47 @@
+[
+    {
+      "Sid": "DenyNonApprovedAMIs",
+      "Effect": "Deny",
+      "Action": [
+        "ec2:RunInstances"
+      ],
+      "Resource": [
+        "arn:aws:ec2:*:*:image/*"
+      ],
+      "Condition": {
+        "StringNotEquals": {
+          "ec2:Owner": [
+            "0123456789012"
+          ]
+        },
+        "ArnNotLike": {
+          "aws:PrincipalARN": [
+            "arn:aws:iam::*:role/pipeline-role"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "DenyNonMarketplaceAMIsForPipeline",
+      "Effect": "Deny",
+      "Action": [
+        "ec2:RunInstances"
+      ],
+      "Resource": [
+        "arn:aws:ec2:*:*:image/*"
+      ],
+      "Condition": {
+        "StringNotEquals": {
+          "ec2:Owner": [
+            "amazon",
+            "aws-marketplace"
+          ]
+        },
+        "ArnLike": {
+          "aws:PrincipalARN": [
+            "arn:aws:iam::0123456789012:role/pipeline-role"
+          ]
+        }
+      }
+    }
+  ]

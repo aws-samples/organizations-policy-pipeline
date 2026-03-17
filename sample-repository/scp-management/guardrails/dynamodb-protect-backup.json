@@ -1,0 +1,9 @@
+[
+    {
+        "Effect": "Deny",
+        "Action": [
+            "dynamodb:DeleteBackup"
+        ],
+        "Resource": "*"
+    }
+]

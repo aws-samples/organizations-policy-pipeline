@@ -1,13 +1,14 @@
 [
   {
-    "Sid": "S3BlockPublicAccess",
     "Effect": "Deny",
     "Action": [
-      "s3:PutAccountPublicAccessBlock"
+      "iam:CreateAccessKey",
+      "iam:CreateUser",
+      "iam:UpdateLoginProfile",
+      "iam:CreateLoginProfile",
+      "iam:DeleteLoginProfile"
     ],
-    "Resource": [
-      "*"
-    ],
+    "Resource": "*",
     "Condition": {
       "ArnNotLike": {
         "aws:PrincipalARN": [

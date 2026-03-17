@@ -1,14 +1,12 @@
 [
   {
-    "Sid": "S3BlockPublicAccess",
     "Effect": "Deny",
-    "Action": [
-      "s3:PutAccountPublicAccessBlock"
-    ],
-    "Resource": [
-      "*"
-    ],
+    "Action": "ec2:ModifySnapshotAttribute",
+    "Resource": "arn:*:ec2:*::snapshot/*",
     "Condition": {
+      "StringEquals": {
+        "ec2:Add/group": "all"
+      },
       "ArnNotLike": {
         "aws:PrincipalARN": [
           "arn:*:iam::*:role/AWSControlTowerExecution",

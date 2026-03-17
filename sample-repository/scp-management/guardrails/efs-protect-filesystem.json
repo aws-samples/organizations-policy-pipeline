@@ -1,0 +1,18 @@
+[
+    {
+        "Effect": "Deny",
+        "Action": [
+            "elasticfilesystem:DeleteFileSystem"
+        ],
+        "Resource": [
+            "*"
+        ],
+        "Condition": {
+            "ArnNotLike": {
+                "aws:PrincipalARN": [
+                    "arn:*:iam::*:role/aws-hcp-deployment-role"
+                ]
+            }
+        }
+    }
+]

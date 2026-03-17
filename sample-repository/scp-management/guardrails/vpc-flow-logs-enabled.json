@@ -1,13 +1,10 @@
 [
   {
-    "Sid": "S3BlockPublicAccess",
     "Effect": "Deny",
     "Action": [
-      "s3:PutAccountPublicAccessBlock"
+      "ec2:DeleteFlowLogs"
     ],
-    "Resource": [
-      "*"
-    ],
+    "Resource": "*",
     "Condition": {
       "ArnNotLike": {
         "aws:PrincipalARN": [

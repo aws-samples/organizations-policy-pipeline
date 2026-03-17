@@ -1,9 +1,10 @@
 [
   {
-    "Sid": "S3BlockPublicAccess",
     "Effect": "Deny",
     "Action": [
-      "s3:PutAccountPublicAccessBlock"
+      "aws-portal:ModifyAccount",
+      "aws-portal:ModifyBilling",
+      "aws-portal:ModifyPaymentMethods"
     ],
     "Resource": [
       "*"

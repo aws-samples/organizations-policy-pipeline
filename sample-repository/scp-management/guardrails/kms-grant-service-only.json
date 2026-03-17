@@ -1,15 +1,11 @@
 [
     {
-        "Sid": "RCPorgid",
         "Effect": "Deny",
-        "Principal": "*",
-        "Action": "s3:*",
+        "Action": "kms:CreateGrant",
         "Resource": "*",
         "Condition": {
-            "StringNotEqualsIfExists": {
-                "aws:PrincipalOrgID": "o-abcdefghij"
-            },
             "BoolIfExists": {
+                "kms:GrantIsForAWSResource": "false",
                 "aws:PrincipalIsAWSService": "false"
             }
         }

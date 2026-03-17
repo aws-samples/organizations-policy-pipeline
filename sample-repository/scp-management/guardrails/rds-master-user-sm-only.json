@@ -1,0 +1,17 @@
+[
+    {
+        "Effect": "Deny",
+        "Action": [
+            "rds:CreateDBInstance",
+            "rds:CreateDBCluster",
+            "rds:ModifyDBCluster",
+            "rds:ModifyDBInstance"
+        ],
+        "Resource": "*",
+        "Condition": {
+            "Bool": {
+                "rds:ManageMasterUserPassword": false
+            }
+        }
+    }
+]

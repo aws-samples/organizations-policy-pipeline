@@ -1,13 +1,11 @@
 [
   {
-    "Sid": "S3BlockPublicAccess",
     "Effect": "Deny",
     "Action": [
-      "s3:PutAccountPublicAccessBlock"
+      "ssm:UpdateServiceSetting",
+      "ssm:ResetServiceSetting"
     ],
-    "Resource": [
-      "*"
-    ],
+    "Resource": "arn:aws:ssm:*:*:servicesetting/ssm/documents/console/public-sharing-permission",
     "Condition": {
       "ArnNotLike": {
         "aws:PrincipalARN": [

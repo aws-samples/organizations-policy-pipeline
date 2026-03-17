@@ -1,9 +1,12 @@
 [
   {
-    "Sid": "S3BlockPublicAccess",
+    "Sid": "GuardKMSActions",
     "Effect": "Deny",
     "Action": [
-      "s3:PutAccountPublicAccessBlock"
+      "kms:DeleteAlias",
+      "kms:DeleteImportedKeyMaterial",
+      "kms:ScheduleKeyDeletion",
+      "kms:DisableKey"
     ],
     "Resource": [
       "*"

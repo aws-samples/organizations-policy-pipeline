@@ -3,12 +3,12 @@
         "SID": "example-account",
         "Target": {
             "Type": "Account",
-            "ID": "app-dev:012345678901"
+            "ID": "app-dev:0123456789012"
         },
         "Guardrails": [
-            "iam-access-analyzer",
+            "iam-access-analyzer-enabled",
             "ec2-no-keypairs",
-            "lambda-function-url"
+            "lambda-url-iam-only"
         ],
         "Policy": "",
         "Comments": "Guardrails for an account"
@@ -20,7 +20,7 @@
             "ID": "Financial-Hom:ou-0xxx-1x2xxx3x"
         },
         "Guardrails": [],
-        "Policy": "scp-tag-finops",
+        "Policy": "tag-finops",
         "Comments": "Policy for OU in HML"
     },
     {
@@ -30,9 +30,9 @@
             "ID": "dev"
         },
         "Guardrails": [
-            "iam-access-analyzer",
+            "iam-access-analyzer-enabled",
             "guardduty-enabled",
-            "rds-encryption"
+            "rds-enforce-encryption"
         ],
         "Policy": "",
         "Comments": "Guardrails for dev environments"
@@ -44,8 +44,8 @@
             "ID": "type:core"
         },
         "Guardrails": [
-            "securityhub-enabled",
-            "ec2-snapshot-encryption"
+            "rds-master-user-sm-only",
+            "ec2-deny-public-ip"
         ],
         "Policy": "",
         "Comments": "Guardrails for accounts with tag type:core"

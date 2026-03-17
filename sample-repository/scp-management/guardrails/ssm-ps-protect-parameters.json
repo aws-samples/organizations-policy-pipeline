@@ -1,0 +1,23 @@
+[
+  {
+    "Sid": "DenyModificationOfAFTParameters",
+    "Effect": "Deny",
+    "Action": [
+      "ssm:PutParameter",
+      "ssm:DeleteParameter",
+      "ssm:DeleteParameters"
+    ],
+    "Resource": [
+      "arn:aws:ssm:*:*:parameter/aft/*",
+      "arn:aws:ssm:*:*:parameter/org/*"
+    ],
+    "Condition": {
+      "ArnNotLike": {
+        "aws:PrincipalARN": [
+          "arn:aws:iam::*:role/AWSControlTowerExecution",
+          "arn:aws:iam::*:role/AWSAFTExecution"
+        ]
+      }
+    }
+  }
+]

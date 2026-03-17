@@ -1,14 +1,16 @@
 [
   {
-    "Sid": "S3BlockPublicAccess",
+    "Sid": "DenyLambdaWithoutVPC",
     "Effect": "Deny",
     "Action": [
-      "s3:PutAccountPublicAccessBlock"
+      "lambda:CreateFunction",
+      "lambda:UpdateFunctionConfiguration"
     ],
-    "Resource": [
-      "*"
-    ],
+    "Resource": "*",
     "Condition": {
+      "Null": {
+        "lambda:VpcIds": "true"
+      },
       "ArnNotLike": {
         "aws:PrincipalARN": [
           "arn:*:iam::*:role/AWSControlTowerExecution",
