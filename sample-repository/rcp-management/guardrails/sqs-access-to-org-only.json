@@ -6,7 +6,7 @@
     "Resource": "*",
     "Condition": {
       "StringNotEqualsIfExists": {
-        "aws:PrincipalOrgID": "o-bwsbjmy5kb"
+        "aws:PrincipalOrgID": "o-abcdefghij"
       },
       "BoolIfExists": {
         "aws:PrincipalIsAWSService": "false"

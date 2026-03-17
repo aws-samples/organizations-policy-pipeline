@@ -9,14 +9,14 @@
     "Resource": "*",
     "Condition": {
       "StringNotEqualsIfExists": {
-        "aws:PrincipalOrgID": "o-bwsbjmy5kb"
+        "aws:PrincipalOrgID": "o-abcdefghij"
       },
       "BoolIfExists": {
         "aws:PrincipalIsAWSService": "false"
       },
       "ArnNotLike": {
         "aws:PrincipalArn": [
-          "arn:aws:iam::385305179682:role/PartnerIAMRole"
+          "arn:aws:iam::012345678901:role/PartnerIAMRole"
         ]
       }
     }
