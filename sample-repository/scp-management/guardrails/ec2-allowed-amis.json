@@ -11,7 +11,7 @@
       "Condition": {
         "StringNotEquals": {
           "ec2:Owner": [
-            "533267246568"
+            "0123456789012"
           ]
         },
         "ArnNotLike": {
@@ -39,7 +39,7 @@
         },
         "ArnLike": {
           "aws:PrincipalARN": [
-            "arn:aws:iam::533267246568:role/pipeline-role"
+            "arn:aws:iam::0123456789012:role/pipeline-role"
           ]
         }
       }
