@@ -5,6 +5,7 @@ import os
 import boto3
 import json
 import sys
+from botocore.config import Config
 
 inference_profile = os.getenv(
     "INFERENCE_PROFILE", "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
@@ -14,6 +15,14 @@ try:
     model_id = json.loads(inference_profile)
 except json.JSONDecodeError:
     model_id = inference_profile
+
+# Newer Claude models (Sonnet 5, Opus 5 and later) think by default, and maxTokens
+# caps thinking + answer together. Keep headroom so the summary isn't cut off.
+MAX_TOKENS = 16000
+
+# AWS recommends a read timeout of at least 60 minutes for Claude inference calls
+# (the botocore default is 60 seconds, which long thinking can exceed).
+READ_TIMEOUT_SECONDS = 3600
 
 
 def load_prompt():
@@ -39,41 +48,34 @@ def concatenate_logs():
 
 
 def query_bedrock(prompt):
-    bedrock = boto3.client(service_name="bedrock-runtime")
-
-    body = json.dumps(
-        {
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 4096,
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0,
-        }
+    bedrock = boto3.client(
+        service_name="bedrock-runtime",
+        config=Config(read_timeout=READ_TIMEOUT_SECONDS),
     )
 
-    accept = "application/json"
-    contentType = "application/json"
-
-    response = bedrock.invoke_model_with_response_stream(
-        body=body, accept=accept, contentType=contentType, modelId=model_id
+    # Converse API: one request/response format for every Bedrock model.
+    # Sampling parameters (temperature, top_p, top_k) are intentionally omitted:
+    # Claude Opus 4.7 and newer models reject them with
+    # "ValidationException: `temperature` is deprecated for this model."
+    response = bedrock.converse_stream(
+        modelId=model_id,
+        messages=[{"role": "user", "content": [{"text": prompt}]}],
+        inferenceConfig={"maxTokens": MAX_TOKENS},
     )
 
     full_response = ""
-    for event in response.get("body"):
-        chunk = json.loads(event.get("chunk").get("bytes").decode())
-        if "delta" in chunk:
-            if "text" in chunk["delta"]:
-                full_response += chunk["delta"]["text"]
-        elif "message" in chunk:
-            if "content" in chunk["message"]:
-                content = chunk["message"]["content"]
-                if isinstance(content, list):
-                    for item in content:
-                        if isinstance(item, dict) and "text" in item:
-                            full_response += item["text"]
-                        else:
-                            full_response += str(item)
-                else:
-                    full_response += str(content)
+    stop_reason = None
+    for event in response["stream"]:
+        if "contentBlockDelta" in event:
+            # Keep only the answer text; reasoning (thinking) deltas are skipped.
+            full_response += event["contentBlockDelta"]["delta"].get("text", "")
+        elif "messageStop" in event:
+            stop_reason = event["messageStop"].get("stopReason")
+
+    if stop_reason not in ("end_turn", "stop_sequence"):
+        print(
+            f"Warning: model stopped with reason '{stop_reason}'. The summary may be incomplete."
+        )
 
     return full_response
 
@@ -83,7 +85,6 @@ prompt = load_prompt()
 pipeline_logs = concatenate_logs()
 prompt += pipeline_logs
 prompt += "\n</Pipeline Logs>"
-prompt += "Assistant:"
 
 response = query_bedrock(prompt)
 
