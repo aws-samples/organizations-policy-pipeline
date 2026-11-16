@@ -46,7 +46,17 @@ resource "aws_codebuild_project" "validation" {
         install = {
           commands = [
             "echo  '[INFO] [INSTALL] Installing dependencies'",
+            # Terraform is downloaded from the official HashiCorp release site, because it is not available in the
+            # CodeBuild image. The download is verified before use: the SHA256SUMS signature must match the HashiCorp
+            # release key (local.hashicorp_pgp_fingerprint) and the zip must match its SHA256 checksum.
             "wget https://releases.hashicorp.com/terraform/${local.terraform_version}/terraform_${local.terraform_version}_linux_amd64.zip",
+            "wget https://releases.hashicorp.com/terraform/${local.terraform_version}/terraform_${local.terraform_version}_SHA256SUMS",
+            "wget https://releases.hashicorp.com/terraform/${local.terraform_version}/terraform_${local.terraform_version}_SHA256SUMS.sig",
+            "wget -O hashicorp.asc https://www.hashicorp.com/.well-known/pgp-key.txt",
+            "echo '[INFO] [INSTALL] Verifying Terraform signature and checksum'",
+            "gpg --import hashicorp.asc",
+            "gpg --status-fd 1 --verify terraform_${local.terraform_version}_SHA256SUMS.sig terraform_${local.terraform_version}_SHA256SUMS | grep -Eq '^\\[GNUPG:\\] VALIDSIG .* ${local.hashicorp_pgp_fingerprint}$'",
+            "grep ' terraform_${local.terraform_version}_linux_amd64.zip$' terraform_${local.terraform_version}_SHA256SUMS | sha256sum -c -",
             "unzip terraform_*_linux_amd64.zip -d /usr/bin/",
             "chmod +x /usr/bin/terraform",
             "mkdir source",
@@ -136,7 +146,17 @@ resource "aws_codebuild_project" "apply" {
         install = {
           commands = [
             "echo  '[INFO] [INSTALL] Installing dependencies'",
+            # Terraform is downloaded from the official HashiCorp release site, because it is not available in the
+            # CodeBuild image. The download is verified before use: the SHA256SUMS signature must match the HashiCorp
+            # release key (local.hashicorp_pgp_fingerprint) and the zip must match its SHA256 checksum.
             "wget https://releases.hashicorp.com/terraform/${local.terraform_version}/terraform_${local.terraform_version}_linux_amd64.zip",
+            "wget https://releases.hashicorp.com/terraform/${local.terraform_version}/terraform_${local.terraform_version}_SHA256SUMS",
+            "wget https://releases.hashicorp.com/terraform/${local.terraform_version}/terraform_${local.terraform_version}_SHA256SUMS.sig",
+            "wget -O hashicorp.asc https://www.hashicorp.com/.well-known/pgp-key.txt",
+            "echo '[INFO] [INSTALL] Verifying Terraform signature and checksum'",
+            "gpg --import hashicorp.asc",
+            "gpg --status-fd 1 --verify terraform_${local.terraform_version}_SHA256SUMS.sig terraform_${local.terraform_version}_SHA256SUMS | grep -Eq '^\\[GNUPG:\\] VALIDSIG .* ${local.hashicorp_pgp_fingerprint}$'",
+            "grep ' terraform_${local.terraform_version}_linux_amd64.zip$' terraform_${local.terraform_version}_SHA256SUMS | sha256sum -c -",
             "unzip terraform_*_linux_amd64.zip -d /usr/bin/",
             "chmod +x /usr/bin/terraform",
             "echo '[INFO] [INSTALL] Installing finished'"

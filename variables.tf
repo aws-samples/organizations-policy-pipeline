@@ -45,6 +45,10 @@ variable "bedrock_model_id" {
   description = "If enable_bedrock is true, define the Bedrock model you want to use"
   type = string
   default = "global.anthropic.claude-sonnet-4-20250514-v1:0"
+  validation {
+    condition     = can(regex("^((global|us|eu|apac|au|jp|in|ca)\\.)?[a-z0-9-]+\\.[^./]+$", var.bedrock_model_id))
+    error_message = "bedrock_model_id must be a model ID (provider.model) or a system-defined inference profile ID with a global, us, eu, apac, au, jp, in or ca prefix. ARNs are not supported, because the IAM permissions are scoped from this value."
+  }
 }
 
 variable "security_gate" {
