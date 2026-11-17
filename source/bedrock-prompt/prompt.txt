@@ -48,6 +48,7 @@ Your analysis will help security managers make informed decisions about implemen
 - Highlight critical changes
 - Include affected account/OU IDs
 - Note any compliance implications
+- Write the entire response in {{SUMMARY_LANGUAGE}}, including section headings and labels. Do not translate policy names, account and OU IDs, AWS service names or IAM actions
 
 <Pipeline Information>
 It is a pipeline to manage AWS Organization Service Control Policies and Resource Control Policies.

@@ -27,7 +27,11 @@ resource "aws_codebuild_project" "validation" {
     environment_variable {
       name  = "INFERENCE_PROFILE"
       value = jsonencode(var.bedrock_model_id)
-    }    
+    }
+    environment_variable {
+      name  = "SUMMARY_LANGUAGE"
+      value = local.bedrock_summary_languages[var.bedrock_summary_language]
+    }
   }
 
 

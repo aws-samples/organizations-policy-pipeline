@@ -85,4 +85,13 @@ locals {
       }
     ] : []
   )
+
+  # Languages available for the Amazon Bedrock summary. Each key is a valid value of
+  # var.bedrock_summary_language, and its value is the language name written into the prompt.
+  # To support a new language, add an entry here.
+  bedrock_summary_languages = {
+    "en"    = "English"
+    "es"    = "Spanish"
+    "pt-BR" = "Brazilian Portuguese"
+  }
 }
