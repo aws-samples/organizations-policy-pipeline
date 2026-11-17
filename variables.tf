@@ -51,6 +51,16 @@ variable "bedrock_model_id" {
   }
 }
 
+variable "bedrock_summary_language" {
+  description = "If enable_bedrock is true, define the language of the Bedrock summary. Valid values are en (English), es (Spanish) and pt-BR (Brazilian Portuguese)"
+  type        = string
+  default     = "en"
+  validation {
+    condition     = contains(keys(local.bedrock_summary_languages), var.bedrock_summary_language)
+    error_message = "Valid values are ${join(", ", keys(local.bedrock_summary_languages))}."
+  }
+}
+
 variable "security_gate" {
   description = "SCPs and RCP policies are analyzed by IAM Access Analyzer. Define which type of findings break the pipeline. Recommended at least ERROR and SECURITY_WARNING"
   validation {

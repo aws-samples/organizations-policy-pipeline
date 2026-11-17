@@ -16,6 +16,10 @@ try:
 except json.JSONDecodeError:
     model_id = inference_profile
 
+# Language name in English (for example "Brazilian Portuguese"). Terraform sets it
+# from var.bedrock_summary_language.
+summary_language = os.getenv("SUMMARY_LANGUAGE", "English")
+
 # Newer Claude models (Sonnet 5, Opus 5 and later) think by default, and maxTokens
 # caps thinking + answer together. Keep headroom so the summary isn't cut off.
 MAX_TOKENS = 16000
@@ -26,8 +30,8 @@ READ_TIMEOUT_SECONDS = 3600
 
 
 def load_prompt():
-    with open("../bedrock-prompt/prompt.txt", "r") as file:
-        return file.read()
+    with open("../bedrock-prompt/prompt.txt", "r", encoding="utf-8") as file:
+        return file.read().replace("{{SUMMARY_LANGUAGE}}", summary_language)
 
 
 def concatenate_logs():
@@ -85,6 +89,8 @@ prompt = load_prompt()
 pipeline_logs = concatenate_logs()
 prompt += pipeline_logs
 prompt += "\n</Pipeline Logs>"
+# The logs are in English and can be long, so repeat the language after them.
+prompt += f"\n\nWrite your entire response in {summary_language}."
 
 response = query_bedrock(prompt)
 
@@ -95,5 +101,6 @@ print()
 print()
 print(response)
 
-with open("summary.txt", "w") as file:
+# Spanish and Portuguese summaries contain non-ASCII characters (for example "ç", "ñ").
+with open("summary.txt", "w", encoding="utf-8") as file:
     file.write(response)
