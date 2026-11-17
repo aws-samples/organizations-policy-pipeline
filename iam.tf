@@ -54,7 +54,10 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
           "codebuild:BatchGetBuilds",
           "codebuild:StartBuild"
         ]
-        Resource = "*"
+        Resource = [
+          aws_codebuild_project.validation.arn,
+          aws_codebuild_project.apply.arn
+        ]
       },
       {
         Effect = "Allow"
@@ -113,15 +116,13 @@ resource "aws_iam_role" "codebuild_role_plan" {
 }
 
 resource "aws_iam_role_policy" "codebuild_policy_plan" {
-  # checkov:skip=CKV_AWS_290:Permission required since this role will create different log groups
-  # checkov:skip=CKV_AWS_355:Permission required since this role will create different log groups
   name = "${var.project_name}-codebuild-policy-plan"
   role = aws_iam_role.codebuild_role_plan.id
 
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       {
         Effect = "Allow"
         Action = [
@@ -129,7 +130,7 @@ resource "aws_iam_role_policy" "codebuild_policy_plan" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
-        Resource = "*"
+        Resource = local.validation_log_group_arns
       },
       {
         Effect = "Allow"
@@ -157,20 +158,39 @@ resource "aws_iam_role_policy" "codebuild_policy_plan" {
       {
         Effect = "Allow"
         Action = [
-          "access-analyzer:CheckNoNewAccess",
-          "access-analyzer:ValidatePolicy",
+          "Organizations:DescribePolicy",
+          "Organizations:ListTargetsForPolicy"
         ]
-        Resource = "*"
+        Resource = local.org_policy_arns
       },
+      {
+        # Policy tags are read by Terraform, account tags by the policy processors (tag-based targets)
+        Effect = "Allow"
+        Action = [
+          "Organizations:ListTagsForResource"
+        ]
+        Resource = concat(local.org_policy_arns, local.org_account_arns)
+      }
+    ], local.bedrock_statements)
+  })
+}
+
+# Actions without resource-level permissions are kept in a separate policy, so the
+# resource-scoped policy above has no statement with Resource "*".
+resource "aws_iam_role_policy" "codebuild_policy_plan_unscoped" {
+  # checkov:skip=CKV_AWS_355:access-analyzer:CheckNoNewAccess, access-analyzer:ValidatePolicy and organizations:ListAccounts do not support resource-level permissions, so Resource must be "*"
+  name = "${var.project_name}-codebuild-policy-plan-unscoped"
+  role = aws_iam_role.codebuild_role_plan.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
       {
         Effect = "Allow"
         Action = [
-          "Organizations:ListAccounts",
-          "Organizations:DescribePolicy",
-          "Organizations:ListTagsForResource",
-          "Organizations:ListTargetsForPolicy",
-          "Bedrock:InvokeModel",
-          "Bedrock:InvokeModelWithResponseStream"
+          "access-analyzer:CheckNoNewAccess",
+          "access-analyzer:ValidatePolicy",
+          "Organizations:ListAccounts"
         ]
         Resource = "*"
       }
@@ -197,8 +217,6 @@ resource "aws_iam_role" "codebuild_role_apply" {
 }
 
 resource "aws_iam_role_policy" "codebuild_policy_apply" {
-  # checkov:skip=CKV_AWS_290:Permission required since this role will create different log groups
-  # checkov:skip=CKV_AWS_355:Permission required since this role will create different log groups  
   name = "${var.project_name}-codebuild-policy-apply"
   role = aws_iam_role.codebuild_role_apply.id
 
@@ -212,7 +230,7 @@ resource "aws_iam_role_policy" "codebuild_policy_apply" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
-        Resource = "*"
+        Resource = local.apply_log_group_arns
       },
       {
         Effect = "Allow"
@@ -241,15 +259,22 @@ resource "aws_iam_role_policy" "codebuild_policy_apply" {
         Effect = "Allow"
         Action = [
           "Organizations:CreatePolicy",
-          "Organizations:AttachPolicy",
           "Organizations:DescribePolicy",
-          "Organizations:DetachPolicy",
           "Organizations:UpdatePolicy",
           "Organizations:DeletePolicy",
           "Organizations:ListTagsForResource",
           "Organizations:ListTargetsForPolicy"
         ]
-        Resource = "*"
+        Resource = local.org_policy_arns
+      },
+      {
+        # Attach and detach are authorized against both the policy and the target (root, OU or account)
+        Effect = "Allow"
+        Action = [
+          "Organizations:AttachPolicy",
+          "Organizations:DetachPolicy"
+        ]
+        Resource = concat(local.org_policy_arns, local.org_target_arns)
       }
     ]
   })
